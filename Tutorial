@@ -1,0 +1,49 @@
+After installing Windows Subsystems for Linux (WSL), My VMware Workstation broke. This is how I fixed it:
+
+Start VMware:
+VMware Error 1: Module 'VPMC' power on failed.VMware Workstation does not support virtualized performance counters on this host.
+ 
+VMware Error 2: You are running this virtual machine with side channel mitigations enabled. Side channel mitigations provide enhanced security but also lower performance.
+To disable mitigations, change the side channel mitigations setting in the advanced panel of the virtual machine settings. 
+
+Still not working? 
+ 
+Delete WSL correctly:
+1. setting> apps> delete> wsl 
+ 
+2. on powershell: open termonal as admin> wsl -l -v #this should list all versions
+Unregister: wsl --unregister <distro name> #you might have more than one
+ 
+3. In Windows features> uncheck wsl and restart pc
+
+Just in case:
+On powershell:
+Dism.exe /Online /Cleanup-Image /StartComponentCleanup /ResetBase
+Dism.exe /Online /Cleanup-Image /RestoreHealth
+sfc /scannow
+chkdsk /scan
+
+WSL is uninstalled! Start VMware and... getting same errors. 
+Why?
+Virtualization applications don't work together with Hyper-V. This affects applications like VMware and Virtualbox when Hyper-V is running.
+Another thing to keep in mind are security applications like Device Guard and Credential Guard that depend on hypervisor.
+Next steps: Determine if Hyper-V-Hypervisor is running: searchbox> msinfo.exe > select System Information > See details for hypervisor
+Why? by design. However, only one software can use Intel VT-x and AMD-V at a time. 
+Disable Hyper-V:
+In control panel > windows feature > deselect Hyper-V-Hypervisor
+In powershell : open terminal as admin> Disable-WindowsOptionalFeature -Online -FeatureName Microsoft-Hyper-V-Hypervisor
+Restart pc
+ 
+Open run
+C:\Users\username\AppData\Local\Packages
+Look for and delete the canonical and linux related folders
+Can't? Is it running? Verify task manager. Can't see it? Verify procmon
+Make sure in windows feature that you deselected WSL and Hyper-V and restart! 
+Open run > C:\Users\username\AppData\Local\Packages
+Look for and delete the canonical and linux related folders
+Delete it!
+Restart
+
+Open VMware and it works! 
+
+  
